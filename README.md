@@ -1,16 +1,33 @@
-# React + Vite
+# ExchangeHub
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Organization portal for exchange programmes: post listings, share apply links, review applicants, AI fit scoring.
 
-Currently, two official plugins are available:
+## Run locally
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+```bash
+npm install
+cp .env.example .env   # add Supabase + Anthropic keys
+npm run dev
+```
 
-## React Compiler
+Open http://localhost:5173
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Interactive demo
 
-## Expanding the ESLint configuration
+Click **Start interactive demo** on the home page, login page, or dashboard header.
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+The demo will:
+
+1. Log in as `demo@exchangehub.app` (creates account + seed data on first run)
+2. Walk through 8 steps with a guided panel (post → link → student form → folders → AI)
+3. Pre-load **Berlin CS** (3 applicants) and **Paris Art** (2 applicants) with sample AI scores
+
+**Supabase:** Disable email confirmation under Authentication → Providers → Email for demo auto-login.
+
+**Demo credentials (manual login):** `demo@exchangehub.app` / `DemoExchange2026!`
+
+**Berlin apply link:** `/apply/demo-berlin-computer-science`
+
+## Stack
+
+React · Vite · Tailwind · Supabase · Anthropic API
