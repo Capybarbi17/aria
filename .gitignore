@@ -26,6 +26,10 @@ lerna-debug.log*
 .cursorignore
 **/.cursor/
 
+# Local planning docs (not for repo)
+prd.md
+tasks.md
+
 # Editor
 .vscode/*
 !.vscode/extensions.json
