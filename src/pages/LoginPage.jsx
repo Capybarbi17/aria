@@ -15,6 +15,7 @@ export default function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
+  const [info, setInfo] = useState(location.state?.message ?? '')
   const [loading, setLoading] = useState(false)
 
   const from = location.state?.from?.pathname || '/dashboard'
@@ -63,6 +64,7 @@ export default function LoginPage() {
       subtitle="Sign in to your organization account"
     >
       <form onSubmit={handleSubmit} className="space-y-5">
+        {info && <Alert variant="success">{info}</Alert>}
         {error && <Alert>{error}</Alert>}
 
         <FormField

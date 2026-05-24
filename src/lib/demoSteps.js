@@ -11,7 +11,7 @@ export const DEMO_STEPS = [
   {
     id: 'post',
     title: 'Step 1 — Post a programme',
-    body: 'Organizations list exchange opportunities here: title, location, description, and requirements (used later by AI).',
+    body: 'Organizations list exchange opportunities here — fill the form manually or paste a programme call and let AI extract every field.',
     path: '/programmes/new',
     role: 'org',
     highlight: 'post-form',
@@ -51,7 +51,7 @@ export const DEMO_STEPS = [
   {
     id: 'ai',
     title: 'Step 6 — AI assistant (wow moment)',
-    body: 'Open a candidate and click Analyze with AI. Claude scores fit 0–100 and shows a green or red flag with a one-sentence reason.',
+    body: 'Open a candidate and click Analyze with AI. OpenAI scores fit 0–100 and shows a green or red flag with a one-sentence reason.',
     path: (meta) =>
       meta?.berlinProgrammeId && meta?.strongApplicationId
         ? `/programmes/${meta.berlinProgrammeId}/applications/${meta.strongApplicationId}`

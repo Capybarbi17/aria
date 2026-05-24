@@ -66,16 +66,44 @@ export default function RegisterPage() {
       return
     }
 
-    setLoading(false)
-
     if (data.session) {
+      setLoading(false)
       navigate('/dashboard', { replace: true })
       return
     }
 
-    setSuccess(
-      'Account created! Check your email to confirm your address, then sign in.'
-    )
+    const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+      email: email.trim(),
+      password,
+    })
+
+    setLoading(false)
+
+    if (signInData?.session) {
+      navigate('/dashboard', { replace: true })
+      return
+    }
+
+    const needsConfirmation =
+      signInError?.message?.toLowerCase().includes('email not confirmed') ||
+      signInError?.message?.toLowerCase().includes('not confirmed')
+
+    if (needsConfirmation) {
+      setSuccess(
+        'Account created! Check your email to confirm your address, then sign in.'
+      )
+      return
+    }
+
+    if (signInError) {
+      setError(signInError.message)
+      return
+    }
+
+    navigate('/login', {
+      replace: true,
+      state: { message: 'Account created. Sign in to continue.' },
+    })
   }
 
   if (authLoading) {

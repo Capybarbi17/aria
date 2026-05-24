@@ -61,7 +61,7 @@ export default function AiAssistantPanel({ application, programme, onUpdated }) 
         <div className="mt-6 flex flex-col items-center rounded-xl bg-indigo-50 py-8 text-center">
           <div className="h-8 w-8 animate-spin rounded-full border-2 border-indigo-200 border-t-indigo-600" />
           <p className="mt-4 text-sm font-medium text-indigo-900">
-            Claude is reviewing this candidate…
+            AI is reviewing this candidate…
           </p>
         </div>
       )}

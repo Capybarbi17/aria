@@ -6,7 +6,7 @@ Organization portal for exchange programmes: post listings, share apply links, r
 
 ```bash
 npm install
-cp .env.example .env   # add Supabase + Anthropic keys
+cp .env.example .env   # add Supabase + OpenAI keys
 npm run dev
 ```
 
@@ -30,4 +30,4 @@ The demo will:
 
 ## Stack
 
-React · Vite · Tailwind · Supabase · Anthropic API
+React · Vite · Tailwind · Supabase · OpenAI API

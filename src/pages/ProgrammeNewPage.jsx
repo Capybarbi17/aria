@@ -8,10 +8,129 @@ import TextareaField from '../components/ui/TextareaField'
 import Alert from '../components/ui/Alert'
 import Button from '../components/ui/Button'
 import SharePanel from '../components/programmes/SharePanel'
+import ProgrammePastePanel from '../components/programmes/ProgrammePastePanel'
 import DemoHighlight from '../components/demo/DemoHighlight'
+
+const MODES = {
+  manual: 'manual',
+  paste: 'paste',
+}
+
+function ModeToggle({ mode, onChange }) {
+  return (
+    <div className="grid gap-3 sm:grid-cols-2">
+      <button
+        type="button"
+        onClick={() => onChange(MODES.manual)}
+        className={`rounded-xl border-2 p-4 text-left transition ${
+          mode === MODES.manual
+            ? 'border-indigo-600 bg-indigo-50/50 ring-1 ring-indigo-600'
+            : 'border-slate-200 bg-white hover:border-slate-300'
+        }`}
+      >
+        <p className="font-semibold text-slate-900">Fill form manually</p>
+        <p className="mt-1 text-sm text-slate-600">
+          Enter title, location, description, and requirements field by field.
+        </p>
+      </button>
+      <button
+        type="button"
+        onClick={() => onChange(MODES.paste)}
+        className={`rounded-xl border-2 p-4 text-left transition ${
+          mode === MODES.paste
+            ? 'border-indigo-600 bg-indigo-50/50 ring-1 ring-indigo-600'
+            : 'border-slate-200 bg-white hover:border-slate-300'
+        }`}
+      >
+        <p className="font-semibold text-slate-900">Paste & extract with AI</p>
+        <p className="mt-1 text-sm text-slate-600">
+          Paste a programme call or brochure — AI fills every field for you.
+        </p>
+      </button>
+    </div>
+  )
+}
+
+function ProgrammeFieldsForm({
+  onSubmit,
+  title,
+  setTitle,
+  location,
+  setLocation,
+  description,
+  setDescription,
+  requirements,
+  setRequirements,
+  deadline,
+  setDeadline,
+  error,
+  loading,
+  submitLabel,
+  extractedNotice,
+}) {
+  return (
+    <form onSubmit={onSubmit} className="space-y-5">
+      {extractedNotice && <Alert variant="success">{extractedNotice}</Alert>}
+      {error && <Alert>{error}</Alert>}
+
+      <FormField
+        id="title"
+        label="Programme title"
+        value={title}
+        onChange={(e) => setTitle(e.target.value)}
+        placeholder="e.g. Berlin — Computer Science Exchange"
+        required
+      />
+
+      <FormField
+        id="location"
+        label="Destination / location"
+        value={location}
+        onChange={(e) => setLocation(e.target.value)}
+        placeholder="e.g. Berlin, Germany"
+        required
+      />
+
+      <FormField
+        id="deadline"
+        label="Application deadline"
+        type="date"
+        value={deadline}
+        onChange={(e) => setDeadline(e.target.value)}
+        hint="Optional"
+      />
+
+      <TextareaField
+        id="description"
+        label="Programme description"
+        value={description}
+        onChange={(e) => setDescription(e.target.value)}
+        placeholder="What is this exchange about? Duration, benefits, etc."
+        required
+        rows={4}
+      />
+
+      <TextareaField
+        id="requirements"
+        label="Ideal candidate requirements"
+        value={requirements}
+        onChange={(e) => setRequirements(e.target.value)}
+        placeholder="GPA, field of study, language level, skills… Used by AI when reviewing applicants."
+        required
+        rows={4}
+        hint="Be specific — the AI uses this to score applicants."
+      />
+
+      <Button type="submit" disabled={loading}>
+        {loading ? 'Publishing…' : submitLabel}
+      </Button>
+    </form>
+  )
+}
 
 export default function ProgrammeNewPage() {
   const { user } = useAuth()
+  const [mode, setMode] = useState(MODES.manual)
   const [title, setTitle] = useState('')
   const [location, setLocation] = useState('')
   const [description, setDescription] = useState('')
@@ -20,6 +139,26 @@ export default function ProgrammeNewPage() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [created, setCreated] = useState(null)
+  const [extractedNotice, setExtractedNotice] = useState('')
+
+  function applyExtractedFields(fields) {
+    setTitle(fields.title)
+    setLocation(fields.location)
+    setDescription(fields.description)
+    setRequirements(fields.requirements)
+    setDeadline(fields.deadline || '')
+    setExtractedNotice(
+      'Fields extracted from your text. Review below, edit anything, then publish.'
+    )
+    setError('')
+  }
+
+  function handleModeChange(next) {
+    setMode(next)
+    if (next === MODES.paste) {
+      setExtractedNotice('')
+    }
+  }
 
   async function handleSubmit(e) {
     e.preventDefault()
@@ -28,6 +167,18 @@ export default function ProgrammeNewPage() {
 
     if (!user) {
       setError('You must be signed in to post a programme.')
+      setLoading(false)
+      return
+    }
+
+    if (!title.trim() || !location.trim()) {
+      setError('Title and location are required.')
+      setLoading(false)
+      return
+    }
+
+    if (!description.trim() || !requirements.trim()) {
+      setError('Description and requirements are required.')
       setLoading(false)
       return
     }
@@ -77,6 +228,18 @@ export default function ProgrammeNewPage() {
     setCreated(programme)
   }
 
+  function resetForAnother() {
+    setCreated(null)
+    setTitle('')
+    setLocation('')
+    setDescription('')
+    setRequirements('')
+    setDeadline('')
+    setExtractedNotice('')
+    setMode(MODES.manual)
+    setError('')
+  }
+
   if (created) {
     const applyUrl = getApplyUrl(created.slug)
 
@@ -106,14 +269,7 @@ export default function ProgrammeNewPage() {
           </Link>
           <button
             type="button"
-            onClick={() => {
-              setCreated(null)
-              setTitle('')
-              setLocation('')
-              setDescription('')
-              setRequirements('')
-              setDeadline('')
-            }}
+            onClick={resetForAnother}
             className="flex-1 rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50"
           >
             Post another
@@ -122,6 +278,12 @@ export default function ProgrammeNewPage() {
       </div>
     )
   }
+
+  const hasFieldData = Boolean(
+    title || location || description || requirements || deadline
+  )
+  const showForm =
+    mode === MODES.manual || Boolean(extractedNotice) || (mode === MODES.paste && hasFieldData)
 
   return (
     <div className="mx-auto max-w-2xl">
@@ -138,66 +300,49 @@ export default function ProgrammeNewPage() {
         </p>
       </div>
 
+      <div className="mb-6">
+        <ModeToggle mode={mode} onChange={handleModeChange} />
+      </div>
+
+      {mode === MODES.paste && (
+        <div className="mb-8">
+          <ProgrammePastePanel onExtracted={applyExtractedFields} />
+        </div>
+      )}
+
       <DemoHighlight id="post-form">
-      <form
-        onSubmit={handleSubmit}
-        className="space-y-5 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8"
-      >
-        {error && <Alert>{error}</Alert>}
+        {showForm && (
+        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+          <h2 className="mb-5 text-lg font-semibold text-slate-900">
+            {extractedNotice ? 'Review & publish' : 'Programme details'}
+          </h2>
 
-        <FormField
-          id="title"
-          label="Programme title"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          placeholder="e.g. Berlin — Computer Science Exchange"
-          required
-        />
-
-        <FormField
-          id="location"
-          label="Destination / location"
-          value={location}
-          onChange={(e) => setLocation(e.target.value)}
-          placeholder="e.g. Berlin, Germany"
-          required
-        />
-
-        <FormField
-          id="deadline"
-          label="Application deadline"
-          type="date"
-          value={deadline}
-          onChange={(e) => setDeadline(e.target.value)}
-          hint="Optional"
-        />
-
-        <TextareaField
-          id="description"
-          label="Programme description"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          placeholder="What is this exchange about? Duration, benefits, etc."
-          required
-          rows={4}
-        />
-
-        <TextareaField
-          id="requirements"
-          label="Ideal candidate requirements"
-          value={requirements}
-          onChange={(e) => setRequirements(e.target.value)}
-          placeholder="GPA, field of study, language level, skills… Used by AI when reviewing applicants."
-          required
-          rows={4}
-          hint="Be specific — the AI uses this to score applicants."
-        />
-
-        <Button type="submit" disabled={loading}>
-          {loading ? 'Publishing…' : 'Publish programme'}
-        </Button>
-      </form>
+          <ProgrammeFieldsForm
+            onSubmit={handleSubmit}
+            title={title}
+            setTitle={setTitle}
+            location={location}
+            setLocation={setLocation}
+            description={description}
+            setDescription={setDescription}
+            requirements={requirements}
+            setRequirements={setRequirements}
+            deadline={deadline}
+            setDeadline={setDeadline}
+            error={error}
+            loading={loading}
+            submitLabel="Publish programme"
+            extractedNotice={extractedNotice}
+          />
+        </div>
+        )}
       </DemoHighlight>
+
+      {mode === MODES.paste && !showForm && (
+        <p className="mt-4 text-center text-sm text-slate-500">
+          After extraction, you&apos;ll review and edit the fields here before publishing.
+        </p>
+      )}
     </div>
   )
 }

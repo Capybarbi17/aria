@@ -124,9 +124,7 @@ export async function ensureDemoLogin() {
   })
 
   if (retryError) {
-    throw new Error(
-      'Demo login failed. Disable email confirmation in Supabase Auth settings, then try again.'
-    )
+    throw new Error(`Demo login failed: ${retryError.message}`)
   }
 
   return retry.session
